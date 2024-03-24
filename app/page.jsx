@@ -14,7 +14,7 @@
 //   description: "Privy Frames",
 //   openGraph: {
 //     title: "Privy Frames",
-//     description: "Privy Frames",
+// description: "Privy Frames",
 //     images: ["https://privy-frames.vercel.app/og-image.png"],
 //   },
 //   //   other: {
