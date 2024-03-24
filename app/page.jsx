@@ -27,7 +27,9 @@ export async function generateMetadata() {
   const metadata = await fetchMetadata(
     new URL(
       "/frames",
-      process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
+      process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000"
     )
   );
   console.log("Metadata: ", metadata);
