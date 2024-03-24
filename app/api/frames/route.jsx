@@ -11,6 +11,16 @@ const handleRequest = frames(async (ctx) => {
 
   if (type === "home") {
     return {
+      accepts: [
+        {
+          id: "farcaster",
+          version: "vNext",
+        },
+        {
+          id: "xmtp",
+          version: "vNext",
+        },
+      ],
       image: (
         <div tw="flex flex-col justify-center items-center w-full h-full">
           <p tw="text-[40px]">Welcome to the Knowledge Cards Frame!</p>
@@ -25,6 +35,16 @@ const handleRequest = frames(async (ctx) => {
     };
   } else if (type === "start") {
     return {
+      accepts: [
+        {
+          id: "farcaster",
+          version: "vNext",
+        },
+        {
+          id: "xmtp",
+          version: "vNext",
+        },
+      ],
       image: (
         <div tw="flex flex-col justify-center items-center w-full h-full">
           <p tw="text-[40px]">Start Exploring!</p>
@@ -44,6 +64,16 @@ const handleRequest = frames(async (ctx) => {
     const results = await callApi(ctx.message.inputText);
     console.log("results :", results);
     return {
+      accepts: [
+        {
+          id: "farcaster",
+          version: "vNext",
+        },
+        {
+          id: "xmtp",
+          version: "vNext",
+        },
+      ],
       image: (
         <>
           <div tw="flex flex-col justify-center items-center w-full h-full">
@@ -80,6 +110,16 @@ const handleRequest = frames(async (ctx) => {
     };
   } else if (type === "error") {
     return {
+      accepts: [
+        {
+          id: "farcaster",
+          version: "vNext",
+        },
+        {
+          id: "xmtp",
+          version: "vNext",
+        },
+      ],
       image: <span>There was an error</span>,
       buttons: [
         <Button action="post" target={{ query: { value: "home" } }}>
