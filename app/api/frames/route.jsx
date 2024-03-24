@@ -137,6 +137,16 @@ const callApi = async (inputText) => {
   const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${inputText}`;
   const response = await fetch(apiUrl);
   const data = await response.json();
+
+  if (data[0].title === "No Definitions Found") {
+    return {
+      word: "No Definitions Found",
+      phonetic: "",
+      partOfSpeech: "",
+      meanings: [],
+      synonyms: [],
+    };
+  }
   const word = data[0]?.word;
   const phonetic = data[0]?.phonetic;
 
