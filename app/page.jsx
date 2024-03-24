@@ -28,7 +28,7 @@ export async function generateMetadata() {
     new URL(
       "/frames",
       process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
+        ? `https://knowledge-cards-two.vercel.app/`
         : "http://localhost:3000"
     )
   );
