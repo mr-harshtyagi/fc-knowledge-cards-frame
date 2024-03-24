@@ -63,51 +63,79 @@ const handleRequest = frames(async (ctx) => {
     console.log("input text :", ctx.message.inputText);
     const results = await callApi(ctx.message.inputText);
     console.log("results :", results);
-    return {
-      accepts: [
-        {
-          id: "farcaster",
-          version: "vNext",
-        },
-        {
-          id: "xmtp",
-          version: "vNext",
-        },
-      ],
-      image: (
-        <>
-          <div tw="flex flex-col justify-center items-center w-full h-full">
-            {/* <p tw="text-[40px]">Here are your results!</p> */}
-            <p tw="">
-              <span tw="text-[40px]">{results.word}</span> ,{" "}
-              <span tw="font-italic">{results.phonetic}</span>
-            </p>
-            <div tw="flex flex-col items-center gap-0 px-2">
-              <p tw="text-[40px]">Definition : </p>
-              {results.meanings.map((meaning, index) => (
-                <div key={index} tw="flex flex-col">
-                  <p tw="">{meaning.definition}</p>
-                  {/* <p tw="">{meaning.example}</p> */}
-                </div>
-              ))}
+    if (results.error) {
+      return {
+        accepts: [
+          {
+            id: "farcaster",
+            version: "vNext",
+          },
+          {
+            id: "xmtp",
+            version: "vNext",
+          },
+        ],
+        image: (
+          <>
+            <div tw="flex flex-col justify-center items-center w-full h-full">
+              <p tw="">
+                <span tw="text-[40px]">{results.message}</span> ,{" "}
+              </p>
             </div>
-            <div tw="flex flex-row ">
-              <p tw="text-[40px]">Synonyms : </p>
-              {results.synonyms.map((synonym, index) => (
-                <p key={index} tw="">
-                  {synonym} ,
-                </p>
-              ))}
+          </>
+        ),
+        buttons: [
+          <Button action="post" target={{ query: { value: "start" } }}>
+            Search Again
+          </Button>,
+        ],
+      };
+    } else
+      return {
+        accepts: [
+          {
+            id: "farcaster",
+            version: "vNext",
+          },
+          {
+            id: "xmtp",
+            version: "vNext",
+          },
+        ],
+        image: (
+          <>
+            <div tw="flex flex-col justify-center items-center w-full h-full">
+              {/* <p tw="text-[40px]">Here are your results!</p> */}
+              <p tw="">
+                <span tw="text-[40px]">{results.word}</span> ,{" "}
+                <span tw="font-italic">{results.phonetic}</span>
+              </p>
+              <div tw="flex flex-col items-center gap-0 px-2">
+                <p tw="text-[40px]">Definition : </p>
+                {results.meanings.map((meaning, index) => (
+                  <div key={index} tw="flex flex-col">
+                    <p tw="">{meaning.definition}</p>
+                    {/* <p tw="">{meaning.example}</p> */}
+                  </div>
+                ))}
+              </div>
+              <div tw="flex flex-row ">
+                <p tw="text-[40px]">Synonyms : </p>
+                {results.synonyms.map((synonym, index) => (
+                  <p key={index} tw="">
+                    {synonym} ,
+                  </p>
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      ),
-      buttons: [
-        <Button action="post" target={{ query: { value: "start" } }}>
-          Search Again
-        </Button>,
-      ],
-    };
+          </>
+        ),
+        buttons: [
+          <Button action="post" target={{ query: { value: "start" } }}>
+            Search Again
+          </Button>,
+        ],
+      };
   } else if (type === "error") {
     return {
       accepts: [
@@ -134,40 +162,46 @@ export const GET = handleRequest;
 export const POST = handleRequest;
 
 const callApi = async (inputText) => {
-  const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${inputText}`;
-  const response = await fetch(apiUrl);
-  const data = await response.json();
+  try {
+    const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${inputText}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-  if (data[0].title === "No Definitions Found") {
+    if (data[0]?.title && data[0]?.message) {
+      console.log("API error:", data[0]?.title);
+      return {
+        error: true,
+        message: data[0]?.title,
+      };
+    } else {
+      const word = data[0]?.word;
+      const phonetic = data[0]?.phonetic;
+
+      const partOfSpeech = data[0]?.meanings[0]?.partOfSpeech;
+      const meanings = data[0].meanings[0].definitions.slice(
+        0,
+        Math.min(1, data[0].meanings[0].definitions.length)
+      );
+      const synonyms = data[0].meanings[0].synonyms.slice(
+        0,
+        Math.min(2, data[0].meanings[0].synonyms.length)
+      );
+
+      const knowledgeCard = {
+        word: word,
+        phonetic: phonetic,
+        partOfSpeech: partOfSpeech,
+        meanings: meanings,
+        synonyms: synonyms,
+      };
+
+      console.log("API results:", knowledgeCard);
+      return knowledgeCard;
+    }
+  } catch (error) {
     return {
-      word: "No Definitions Found",
-      phonetic: "",
-      partOfSpeech: "",
-      meanings: [],
-      synonyms: [],
+      error: true,
+      message: "Definition not found!",
     };
   }
-  const word = data[0]?.word;
-  const phonetic = data[0]?.phonetic;
-
-  const partOfSpeech = data[0]?.meanings[0]?.partOfSpeech;
-  const meanings = data[0].meanings[0].definitions.slice(
-    0,
-    Math.min(1, data[0].meanings[0].definitions.length)
-  );
-  const synonyms = data[0].meanings[0].synonyms.slice(
-    0,
-    Math.min(2, data[0].meanings[0].synonyms.length)
-  );
-
-  const knowledgeCard = {
-    word: word,
-    phonetic: phonetic,
-    partOfSpeech: partOfSpeech,
-    meanings: meanings,
-    synonyms: synonyms,
-  };
-
-  console.log("API results:", knowledgeCard);
-  return knowledgeCard;
 };
